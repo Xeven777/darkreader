@@ -8,11 +8,11 @@ import rollupPluginTypescript from '@rollup/plugin-typescript';
 import * as rollup from 'rollup';
 import typescript from 'typescript';
 
-import {getDestDir, absolutePath} from './paths.js';
-import {PLATFORM} from './platform.js';
+import { getDestDir, absolutePath } from './paths.js';
+import { PLATFORM } from './platform.js';
 import * as reload from './reload.js';
-const {PORT} = reload;
-import {createTask} from './task.js';
+const { PORT } = reload;
+import { createTask } from './task.js';
 
 /** @typedef {import('chokidar').FSWatcher} FSWatcher */
 /** @typedef {import('./types').JSEntry} JSEntry */
@@ -73,7 +73,7 @@ const jsEntries = [
 const rollupCache = {};
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
-    const {src, dest} = entry;
+    const { src, dest } = entry;
 
     let replace = {};
     switch (platform) {
@@ -101,7 +101,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
 
     const cacheId = `${entry.src}-${platform}-${debug}-${watch}-${log}-${test}`;
-    const outDir = getDestDir({debug, platform});
+    const outDir = getDestDir({ debug, platform });
 
     const bundle = await rollup.rollup({
         input: absolutePath(src),
@@ -155,7 +155,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
                 __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                 __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
-                __PLUS__: platform === PLATFORM.CHROMIUM_MV2_PLUS,
+                __PLUS__: true,
                 __PORT__: watch ? String(PORT) : '-1',
                 __TEST__: test,
                 __WATCH__: watch,
@@ -191,7 +191,7 @@ export function createBundleJSTask(jsEntries) {
     };
 
     /** @type {(options: Partial<TaskOptions> & {platforms: TaskOptions['platforms']}, entries?: JSEntry[]) => Promise<void>} */
-    const bundleEachPlatform = async ({platforms, debug, watch, log, test}, entries) => {
+    const bundleEachPlatform = async ({ platforms, debug, watch, log, test }, entries) => {
         const allPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API);
         for (const entry of (entries || jsEntries)) {
             const possiblePlatforms = entry.platform ? [entry.platform] : allPlatforms;
@@ -223,7 +223,7 @@ export function createBundleJSTask(jsEntries) {
                 return entry.watchFiles?.includes(changed);
             });
         });
-        await bundleEachPlatform({platforms, debug: true, watch: true}, entries);
+        await bundleEachPlatform({ platforms, debug: true, watch: true }, entries);
 
         const newWatchFiles = getRelevantWatchFiles();
         watcher.unwatch(
